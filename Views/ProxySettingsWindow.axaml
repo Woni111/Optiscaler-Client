@@ -2,7 +2,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="OptiscalerClient.Views.ProxySettingsWindow"
         Title="Network &amp; Proxy"
-        Width="560"
+        Width="620"
+        MaxHeight="840"
         SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
         SystemDecorations="None"
@@ -81,7 +82,11 @@
                         </Border>
 
                         <!-- Content -->
-                        <StackPanel Grid.Row="1" Margin="24,20" Spacing="12">
+                        <ScrollViewer Grid.Row="1"
+                                      MaxHeight="620"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="24,20" Spacing="12">
 
                             <!-- Use System Proxy -->
                             <Border Classes="InteractiveOption CardOption"
@@ -205,6 +210,72 @@
 
                             </StackPanel>
 
+                            <!-- GitHub mirror and OptiScaler release source -->
+                            <Border Background="{StaticResource BrBgCard}"
+                                    BorderBrush="{StaticResource BrBorderSubtle}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource RadiusMedium}"
+                                    Padding="16,14">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="{DynamicResource TxtGitHubMirrorSection}"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource BrTextPrimary}"/>
+                                    <TextBlock Text="{DynamicResource TxtGitHubMirrorDesc}"
+                                               Foreground="{StaticResource BrTextSecondary}"
+                                               TextWrapping="Wrap"
+                                               FontSize="{StaticResource FontSizeCaption}"/>
+
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                            <TextBlock Text="{DynamicResource TxtGitHubMirrorEnable}"
+                                                       Foreground="{StaticResource BrTextPrimary}"/>
+                                            <TextBlock Text="{DynamicResource TxtGitHubMirrorEnableDesc}"
+                                                       Foreground="{StaticResource BrTextSecondary}"
+                                                       TextWrapping="Wrap"
+                                                       FontSize="{StaticResource FontSizeCaption}"
+                                                       Margin="0,3,12,0"/>
+                                        </StackPanel>
+                                        <ToggleSwitch Name="TglUseGitHubMirror"
+                                                      Grid.Column="1"
+                                                      OnContent="" OffContent=""
+                                                      Focusable="False"
+                                                      IsCheckedChanged="TglUseGitHubMirror_IsCheckedChanged"/>
+                                    </Grid>
+
+                                    <Grid Name="PnlGitHubMirror" ColumnDefinitions="120,*" IsEnabled="False">
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{DynamicResource TxtGitHubMirrorPrefix}"
+                                                   Foreground="{StaticResource BrTextSecondary}"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBox Name="TxtGitHubMirrorPrefix"
+                                                 Grid.Column="1"
+                                                 Watermark="{DynamicResource TxtGitHubMirrorPrefixPlaceholder}"
+                                                 LostFocus="TxtGitHubMirrorPrefix_LostFocus"/>
+                                    </Grid>
+
+                                    <Border Height="1" Background="{StaticResource BrBorderSubtle}" Margin="0,2"/>
+
+                                    <Grid ColumnDefinitions="120,*">
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{DynamicResource TxtOptiScalerSource}"
+                                                   Foreground="{StaticResource BrTextSecondary}"
+                                                   VerticalAlignment="Center"/>
+                                        <ComboBox Name="CmbOptiScalerSource"
+                                                  Grid.Column="1"
+                                                  SelectionChanged="CmbOptiScalerSource_SelectionChanged">
+                                            <ComboBoxItem Content="{DynamicResource TxtOptiScalerSourceOfficial}"
+                                                          Tag="official"/>
+                                            <ComboBoxItem Content="{DynamicResource TxtOptiScalerSourceChinese}"
+                                                          Tag="chinese"/>
+                                        </ComboBox>
+                                    </Grid>
+                                    <TextBlock Text="{DynamicResource TxtOptiScalerSourceDesc}"
+                                               Foreground="{StaticResource BrTextSecondary}"
+                                               TextWrapping="Wrap"
+                                               FontSize="{StaticResource FontSizeCaption}"/>
+                                </StackPanel>
+                            </Border>
+
                             <!-- Test connection -->
                             <Border Background="{StaticResource BrBgCard}"
                                     BorderBrush="{StaticResource BrBorderSubtle}"
@@ -229,6 +300,7 @@
                             </Border>
 
                         </StackPanel>
+                        </ScrollViewer>
 
                         <!-- Footer -->
                         <!-- Footer -->

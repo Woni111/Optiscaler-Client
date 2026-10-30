@@ -88,6 +88,9 @@ Optional integrations, enabled from **Settings → Experimental**:
 
 - Supports system proxy settings and `HTTP_PROXY` / `HTTPS_PROXY` environment variables.
 - Also supports explicit proxy configuration from app settings (including auth when required).
+- Optional GitHub mirror prefix (for example `https://gh-proxy.com/`) for API requests and release downloads.
+- Switch the OptiScaler release source between the official repository and the Chinese `deYangar/OptiScaler_chs` builds.
+- Stable and nightly CHS downloads use a separate cache namespace, so identically tagged official and translated builds do not overwrite each other.
 - Network settings are persisted in app configuration.
 
 ### Settings & Customization

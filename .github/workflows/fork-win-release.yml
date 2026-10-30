@@ -1,0 +1,68 @@
+name: Fork Windows Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-win-x64:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout selected branch
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Resolve release metadata
+        id: meta
+        shell: pwsh
+        run: |
+          $match = Select-String -Path OptiscalerClient.csproj -Pattern '<Version>([^<]+)</Version>'
+          if (-not $match) { throw "Version not found in OptiscalerClient.csproj" }
+          $version = $match.Matches[0].Groups[1].Value
+          $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
+          $tag = "fork-v$version-mirror-chs-$stamp"
+          $asset = "OptiscalerClient-$version-win-x64.zip"
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+          "asset=$asset" >> $env:GITHUB_OUTPUT
+
+      - name: Publish win-x64
+        shell: pwsh
+        run: |
+          dotnet publish OptiscalerClient.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:EnableCompressionInSingleFile=true `
+            -o dist/win-x64
+
+      - name: Create zip
+        shell: pwsh
+        run: |
+          Compress-Archive `
+            -Path "dist/win-x64/*" `
+            -DestinationPath "dist/${{ steps.meta.outputs.asset }}" `
+            -CompressionLevel Optimal
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: Optiscaler Client ${{ steps.meta.outputs.version }} (mirror + CHS fork)
+          body: |
+            Fork build with GitHub mirror support and the OptiScaler / OptiScaler_chs source selector.
+
+            Built from `${{ github.ref_name }}` at `${{ github.sha }}`.
+          files: dist/${{ steps.meta.outputs.asset }}
+          prerelease: false
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

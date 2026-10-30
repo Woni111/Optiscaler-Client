@@ -432,6 +432,16 @@ Esta versión no está disponible para descarga. Verificá tu conexión a intern
     <x:String x:Key="TxtNetworkTestOk">✓ Conectado</x:String>
     <x:String x:Key="TxtNetworkTestFail">✗ Falló</x:String>
     <x:String x:Key="TxtNetworkTestTesting">Probando…</x:String>
+    <x:String x:Key="TxtGitHubMirrorSection">Espejo de GitHub y origen de versiones</x:String>
+    <x:String x:Key="TxtGitHubMirrorDesc">Usa un espejo para las solicitudes a la API de GitHub y las descargas cuando GitHub va lento o no está disponible.</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnable">Usar espejo de GitHub</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnableDesc">Se aplica a las solicitudes de la API de GitHub y a las descargas del cliente.</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefix">Prefijo del espejo</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
+    <x:String x:Key="TxtOptiScalerSource">Origen de OptiScaler</x:String>
+    <x:String x:Key="TxtOptiScalerSourceOfficial">Oficial (optiscaler/OptiScaler)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">Chino (deYangar/OptiScaler_chs)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceDesc">El origen chino instala las compilaciones traducidas de OptiScaler_chs. Las versiones estable y nocturna siguen esta selección y las cachés se mantienen separadas.</x:String>
 
     <x:String x:Key="TxtViewGrid">Vista de cuadrícula</x:String>
     <x:String x:Key="TxtViewList">Vista de lista</x:String>

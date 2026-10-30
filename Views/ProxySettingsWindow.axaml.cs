@@ -96,6 +96,29 @@ namespace OptiscalerClient.Views
             var tgl = this.FindControl<ToggleSwitch>("TglUseSystemProxy");
             if (tgl != null) tgl.IsChecked = net.UseSystemProxy;
 
+            var mirrorToggle = this.FindControl<ToggleSwitch>("TglUseGitHubMirror");
+            if (mirrorToggle != null) mirrorToggle.IsChecked = net.UseGitHubMirror;
+
+            var txtMirror = this.FindControl<TextBox>("TxtGitHubMirrorPrefix");
+            if (txtMirror != null) txtMirror.Text = net.GitHubMirrorPrefix;
+
+            var cmbSource = this.FindControl<ComboBox>("CmbOptiScalerSource");
+            if (cmbSource != null)
+            {
+                var source = _componentService.IsChineseOptiScalerSource
+                    ? ComponentManagementService.ChineseOptiScalerSource
+                    : ComponentManagementService.OfficialOptiScalerSource;
+                for (int i = 0; i < cmbSource.Items.Count; i++)
+                {
+                    if ((cmbSource.Items[i] as ComboBoxItem)?.Tag?.ToString() == source)
+                    {
+                        cmbSource.SelectedIndex = i;
+                        break;
+                    }
+                }
+                if (cmbSource.SelectedIndex < 0) cmbSource.SelectedIndex = 0;
+            }
+
             var cmb = this.FindControl<ComboBox>("CmbProxyType");
             if (cmb != null)
             {
@@ -125,6 +148,7 @@ namespace OptiscalerClient.Views
             _isLoading = false;
             UpdateExplicitProxyVisibility(!net.UseSystemProxy);
             UpdateCredentialsVisibility(net.ProxyRequiresAuth);
+            UpdateGitHubMirrorVisibility(net.UseGitHubMirror);
         }
 
         private void UpdateExplicitProxyVisibility(bool enabled)
@@ -136,6 +160,12 @@ namespace OptiscalerClient.Views
         private void UpdateCredentialsVisibility(bool enabled)
         {
             var pnl = this.FindControl<StackPanel>("PnlCredentials");
+            if (pnl != null) pnl.IsEnabled = enabled;
+        }
+
+        private void UpdateGitHubMirrorVisibility(bool enabled)
+        {
+            var pnl = this.FindControl<Grid>("PnlGitHubMirror");
             if (pnl != null) pnl.IsEnabled = enabled;
         }
 
@@ -154,6 +184,45 @@ namespace OptiscalerClient.Views
             _componentService.Config.Network.UseSystemProxy = tgl.IsChecked ?? true;
             UpdateExplicitProxyVisibility(!(tgl.IsChecked ?? true));
             SaveAndReconfigure();
+        }
+
+        private void TglUseGitHubMirror_IsCheckedChanged(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading) return;
+            if (sender is not ToggleSwitch tgl) return;
+            _componentService.Config.Network.UseGitHubMirror = tgl.IsChecked ?? false;
+            UpdateGitHubMirrorVisibility(tgl.IsChecked ?? false);
+            SaveAndReconfigure();
+        }
+
+        private void TxtGitHubMirrorPrefix_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is not TextBox tb) return;
+            var normalized = NetworkService.NormalizeGitHubMirrorPrefix(tb.Text);
+            tb.Text = normalized;
+            _componentService.Config.Network.GitHubMirrorPrefix = normalized;
+            SaveAndReconfigure();
+        }
+
+        private async void CmbOptiScalerSource_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isLoading) return;
+            if (sender is not ComboBox cmb) return;
+            var source = (cmb.SelectedItem as ComboBoxItem)?.Tag?.ToString()
+                ?? ComponentManagementService.OfficialOptiScalerSource;
+            _componentService.SetOptiScalerSource(source);
+            SaveAndReconfigure();
+
+            // Refresh the version lists immediately so the Stable/Nightly tabs reflect the
+            // newly selected repository without requiring an app restart.
+            try
+            {
+                await _componentService.CheckForUpdatesAsync();
+            }
+            catch (Exception ex)
+            {
+                DebugWindow.Log($"[ProxySettings] OptiScaler source refresh failed: {ex.Message}");
+            }
         }
 
         private void CmbProxyType_SelectionChanged(object sender, SelectionChangedEventArgs e)

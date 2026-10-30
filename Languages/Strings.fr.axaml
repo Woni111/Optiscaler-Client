@@ -798,6 +798,16 @@ Cette version n'est pas disponible en téléchargement. Vérifiez votre connexio
     <x:String x:Key="TxtNetworkTestOk">✓ Connecté</x:String>
     <x:String x:Key="TxtNetworkTestFail">✗ Échec</x:String>
     <x:String x:Key="TxtNetworkTestTesting">Test en cours…</x:String>
+    <x:String x:Key="TxtGitHubMirrorSection">Miroir GitHub et source de version</x:String>
+    <x:String x:Key="TxtGitHubMirrorDesc">Utilise un miroir pour l’API GitHub et les téléchargements lorsque GitHub est lent ou indisponible.</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnable">Utiliser le miroir GitHub</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnableDesc">S’applique aux requêtes API GitHub et aux téléchargements de versions du client.</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefix">Préfixe du miroir</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
+    <x:String x:Key="TxtOptiScalerSource">Source d’OptiScaler</x:String>
+    <x:String x:Key="TxtOptiScalerSourceOfficial">Officielle (optiscaler/OptiScaler)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">Chinoise (deYangar/OptiScaler_chs)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceDesc">La source chinoise installe les versions traduites d’OptiScaler_chs. Les canaux stable et nightly suivent ce choix, avec des caches séparés.</x:String>
 
     <!-- Welcome popup -->
     <x:String x:Key="TxtWelcomeChangelogTitle">Journal des modifications</x:String>

@@ -778,6 +778,16 @@
     <x:String x:Key="TxtNetworkTestOk">✓ Подключено</x:String>
     <x:String x:Key="TxtNetworkTestFail">✗ Не удалось</x:String>
     <x:String x:Key="TxtNetworkTestTesting">Проверка…</x:String>
+    <x:String x:Key="TxtGitHubMirrorSection">Зеркало GitHub и источник релизов</x:String>
+    <x:String x:Key="TxtGitHubMirrorDesc">Направлять запросы API GitHub и загрузки релизов через зеркало, если GitHub работает медленно или недоступен.</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnable">Использовать зеркало GitHub</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnableDesc">Применяется к запросам API GitHub и загрузке релизов клиента.</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefix">Префикс зеркала</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
+    <x:String x:Key="TxtOptiScalerSource">Источник OptiScaler</x:String>
+    <x:String x:Key="TxtOptiScalerSourceOfficial">Официальный (optiscaler/OptiScaler)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">Китайский (deYangar/OptiScaler_chs)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceDesc">Китайский источник устанавливает переведённые сборки OptiScaler_chs. Каналы Stable и Nightly следуют этому выбору, а кэши хранятся отдельно.</x:String>
 
     <!-- Welcome popup -->
     <x:String x:Key="TxtWelcomeChangelogTitle">Журнал изменений</x:String>

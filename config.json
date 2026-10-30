@@ -7,6 +7,10 @@
         "RepoOwner": "optiscaler",
         "RepoName": "OptiScaler"
     },
+    "OptiScalerChinese": {
+        "RepoOwner": "deYangar",
+        "RepoName": "OptiScaler_chs"
+    },
     "OptiPatcher": {
         "RepoOwner": "optiscaler",
         "RepoName": "OptiPatcher"
@@ -79,5 +83,12 @@
         { "PathSegment": "Proton BattlEye Runtime" }
     ],
     "SteamGridDBApiKey": "",
+    "OptiScalerSource": "official",
+    "Network": {
+        "UseSystemProxy": true,
+        "UseGitHubMirror": false,
+        "GitHubMirrorPrefix": "https://gh-proxy.com/",
+        "ProxyType": "HTTPS"
+    },
     "Debug": false
 }

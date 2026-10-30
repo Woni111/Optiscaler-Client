@@ -798,6 +798,16 @@ Diese Version steht nicht zum Herunterladen zur Verfügung. Überprüfen Sie Ihr
     <x:String x:Key="TxtNetworkTestOk">✓ Verbunden</x:String>
     <x:String x:Key="TxtNetworkTestFail">✗ Fehlgeschlagen</x:String>
     <x:String x:Key="TxtNetworkTestTesting">Test läuft…</x:String>
+    <x:String x:Key="TxtGitHubMirrorSection">GitHub-Spiegel &amp; Release-Quelle</x:String>
+    <x:String x:Key="TxtGitHubMirrorDesc">Leite GitHub-API- und Release-Downloads über einen Spiegel, wenn GitHub langsam oder nicht erreichbar ist.</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnable">GitHub-Spiegel verwenden</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnableDesc">Gilt für GitHub-API-Anfragen und Release-Downloads des Clients.</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefix">Spiegel-Präfix</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
+    <x:String x:Key="TxtOptiScalerSource">OptiScaler-Quelle</x:String>
+    <x:String x:Key="TxtOptiScalerSourceOfficial">Offiziell (optiscaler/OptiScaler)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">Chinesisch (deYangar/OptiScaler_chs)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceDesc">Die chinesische Quelle installiert übersetzte Builds aus OptiScaler_chs. Stable und Nightly folgen dieser Auswahl; Cache-Dateien bleiben getrennt.</x:String>
 
     <!-- Welcome popup -->
     <x:String x:Key="TxtWelcomeChangelogTitle">Änderungsprotokoll</x:String>

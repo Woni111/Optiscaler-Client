@@ -798,6 +798,16 @@ Questa versione non è disponibile per il download. Controlla la tua connessione
     <x:String x:Key="TxtNetworkTestOk">✓ Connesso</x:String>
     <x:String x:Key="TxtNetworkTestFail">✗ Fallito</x:String>
     <x:String x:Key="TxtNetworkTestTesting">Testing…</x:String>
+    <x:String x:Key="TxtGitHubMirrorSection">Mirror GitHub e origine release</x:String>
+    <x:String x:Key="TxtGitHubMirrorDesc">Usa un mirror per le richieste all’API GitHub e i download quando GitHub è lento o non disponibile.</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnable">Usa mirror GitHub</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnableDesc">Si applica alle richieste API GitHub e ai download delle release del client.</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefix">Prefisso del mirror</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
+    <x:String x:Key="TxtOptiScalerSource">Origine OptiScaler</x:String>
+    <x:String x:Key="TxtOptiScalerSourceOfficial">Ufficiale (optiscaler/OptiScaler)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">Cinese (deYangar/OptiScaler_chs)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceDesc">L’origine cinese installa le build tradotte di OptiScaler_chs. I canali stable e nightly seguono questa scelta e le cache restano separate.</x:String>
 
     <!-- Welcome popup -->
     <x:String x:Key="TxtWelcomeChangelogTitle">Cronologia delle modifiche</x:String>

@@ -798,6 +798,16 @@ Ta wersja nie jest dostępna do pobrania. Sprawdź połączenie internetowe i sp
     <x:String x:Key="TxtNetworkTestOk">✓ Połączono</x:String>
     <x:String x:Key="TxtNetworkTestFail">✗ Nie powiodło się</x:String>
     <x:String x:Key="TxtNetworkTestTesting">Testowanie…</x:String>
+    <x:String x:Key="TxtGitHubMirrorSection">Lustro GitHub i źródło wydań</x:String>
+    <x:String x:Key="TxtGitHubMirrorDesc">Kieruj żądania API GitHub i pobieranie wydań przez lustro, gdy GitHub działa wolno lub jest niedostępny.</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnable">Używaj lustra GitHub</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnableDesc">Dotyczy żądań API GitHub i pobierania plików wydań w kliencie.</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefix">Prefiks lustra</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
+    <x:String x:Key="TxtOptiScalerSource">Źródło OptiScaler</x:String>
+    <x:String x:Key="TxtOptiScalerSourceOfficial">Oficjalne (optiscaler/OptiScaler)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">Chińskie (deYangar/OptiScaler_chs)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceDesc">Źródło chińskie instaluje przetłumaczone kompilacje OptiScaler_chs. Kanały Stable i Nightly stosują ten wybór, a pamięć podręczna jest oddzielna.</x:String>
 
     <!-- Welcome popup -->
     <x:String x:Key="TxtWelcomeChangelogTitle">Historia zmian</x:String>

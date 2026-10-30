@@ -785,6 +785,16 @@
     <x:String x:Key="TxtNetworkTestOk">✓ 已连接</x:String>
     <x:String x:Key="TxtNetworkTestFail">✗ 失败</x:String>
     <x:String x:Key="TxtNetworkTestTesting">测试中…</x:String>
+    <x:String x:Key="TxtGitHubMirrorSection">GitHub 镜像与发布源</x:String>
+    <x:String x:Key="TxtGitHubMirrorDesc">当 GitHub 访问缓慢或不可用时，通过镜像获取 GitHub API 和发布包。</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnable">使用 GitHub 镜像</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnableDesc">同时应用于客户端使用的 GitHub API 请求和发布资产下载。</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefix">镜像前缀</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
+    <x:String x:Key="TxtOptiScalerSource">OptiScaler 发布源</x:String>
+    <x:String x:Key="TxtOptiScalerSourceOfficial">官方（optiscaler/OptiScaler）</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">汉化版（deYangar/OptiScaler_chs）</x:String>
+    <x:String x:Key="TxtOptiScalerSourceDesc">汉化源会安装 OptiScaler_chs 的翻译构建。稳定版和夜间版通道均跟随此选择，缓存文件与官方源分开保存。</x:String>
 
     <!-- Welcome popup -->
     <x:String x:Key="TxtWelcomeChangelogTitle">更新日志</x:String>

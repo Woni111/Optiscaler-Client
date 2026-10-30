@@ -777,6 +777,16 @@ Bu sürüm indirilemez. İnternet bağlantınızı kontrol edip daha sonra tekra
     <x:String x:Key="TxtNetworkTestOk">✓ Bağlandı</x:String>
     <x:String x:Key="TxtNetworkTestFail">✗ Başarısız</x:String>
     <x:String x:Key="TxtNetworkTestTesting">Test ediliyor…</x:String>
+    <x:String x:Key="TxtGitHubMirrorSection">GitHub Aynası ve Sürüm Kaynağı</x:String>
+    <x:String x:Key="TxtGitHubMirrorDesc">GitHub yavaş veya kullanılamaz olduğunda API isteklerini ve sürüm indirmelerini bir ayna üzerinden yönlendir.</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnable">GitHub aynasını kullan</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnableDesc">İstemcinin GitHub API istekleri ve sürüm indirmeleri için geçerlidir.</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefix">Ayna öneki</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
+    <x:String x:Key="TxtOptiScalerSource">OptiScaler kaynağı</x:String>
+    <x:String x:Key="TxtOptiScalerSourceOfficial">Resmî (optiscaler/OptiScaler)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">Çince (deYangar/OptiScaler_chs)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceDesc">Çince kaynak, OptiScaler_chs içindeki çevrilmiş derlemeleri yükler. Stable ve Nightly kanalları bu seçimi izler ve önbellekler ayrı tutulur.</x:String>
 
     <!-- Welcome popup -->
     <x:String x:Key="TxtWelcomeChangelogTitle">Değişiklik Günlüğü</x:String>

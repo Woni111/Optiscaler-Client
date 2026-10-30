@@ -432,6 +432,16 @@ This version is unavailable for download. Check your internet connection and try
     <x:String x:Key="TxtNetworkTestOk">✓ Connected</x:String>
     <x:String x:Key="TxtNetworkTestFail">✗ Failed</x:String>
     <x:String x:Key="TxtNetworkTestTesting">Testing…</x:String>
+    <x:String x:Key="TxtGitHubMirrorSection">GitHub Mirror &amp; Release Source</x:String>
+    <x:String x:Key="TxtGitHubMirrorDesc">Route GitHub API and release downloads through a mirror when GitHub is slow or unavailable.</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnable">Use GitHub mirror</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnableDesc">Applies to GitHub API requests and release asset downloads used by the client.</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefix">Mirror prefix</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
+    <x:String x:Key="TxtOptiScalerSource">OptiScaler source</x:String>
+    <x:String x:Key="TxtOptiScalerSourceOfficial">Official (optiscaler/OptiScaler)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">Chinese (deYangar/OptiScaler_chs)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceDesc">The Chinese source installs translated builds from OptiScaler_chs. Stable and nightly channels follow this selection, and cached files are kept separate from the official source.</x:String>
 
     <x:String x:Key="TxtViewGrid">Grid view</x:String>
     <x:String x:Key="TxtViewList">List view</x:String>

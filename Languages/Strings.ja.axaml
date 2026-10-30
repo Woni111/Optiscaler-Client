@@ -786,6 +786,16 @@
     <x:String x:Key="TxtNetworkTestOk">✓ 接続成功</x:String>
     <x:String x:Key="TxtNetworkTestFail">✗ 失敗</x:String>
     <x:String x:Key="TxtNetworkTestTesting">テスト中…</x:String>
+    <x:String x:Key="TxtGitHubMirrorSection">GitHub ミラーとリリース元</x:String>
+    <x:String x:Key="TxtGitHubMirrorDesc">GitHub が遅い、または利用できない場合に、GitHub API とリリースのダウンロードをミラー経由で行います。</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnable">GitHub ミラーを使用</x:String>
+    <x:String x:Key="TxtGitHubMirrorEnableDesc">クライアントの GitHub API リクエストとリリースのダウンロードに適用されます。</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefix">ミラーのプレフィックス</x:String>
+    <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
+    <x:String x:Key="TxtOptiScalerSource">OptiScaler の取得元</x:String>
+    <x:String x:Key="TxtOptiScalerSourceOfficial">公式（optiscaler/OptiScaler）</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">中国語版（deYangar/OptiScaler_chs）</x:String>
+    <x:String x:Key="TxtOptiScalerSourceDesc">中国語版の取得元では OptiScaler_chs の翻訳済みビルドをインストールします。Stable と Nightly の両方がこの選択に従い、キャッシュは公式版と分離されます。</x:String>
 
     <!-- Welcome popup -->
     <x:String x:Key="TxtWelcomeChangelogTitle">変更履歴</x:String>

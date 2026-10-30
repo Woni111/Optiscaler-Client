@@ -119,6 +119,58 @@ namespace OptiscalerClient.Services
         /// </summary>
         public const string LatestAvailableTag = "__latest__";
 
+        public const string OfficialOptiScalerSource = "official";
+        public const string ChineseOptiScalerSource = "chinese";
+
+        public bool IsChineseOptiScalerSource =>
+            string.Equals(_config.OptiScalerSource, ChineseOptiScalerSource, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>The repository that supplies stable OptiScaler releases for the selected source.</summary>
+        private RepositoryConfig EffectiveStableOptiScalerRepo =>
+            IsChineseOptiScalerSource ? _config.OptiScalerChinese : _config.OptiScaler;
+
+        /// <summary>The repository that supplies nightly OptiScaler releases for the selected source.</summary>
+        private RepositoryConfig EffectiveNightlyOptiScalerRepo =>
+            IsChineseOptiScalerSource ? _config.OptiScalerChinese : _config.OptiScalerNightly;
+
+        private static string RepoKey(RepositoryConfig repo) => $"{repo.RepoOwner}/{repo.RepoName}";
+
+        private static bool IsSameRepository(OptiScalerReleaseEntry entry, RepositoryConfig repo) =>
+            string.Equals(entry.SourceRepository, RepoKey(repo), StringComparison.OrdinalIgnoreCase);
+
+        private bool IsEntryFromActiveOptiScalerSource(OptiScalerReleaseEntry entry)
+        {
+            if (entry.IsNightly)
+                return IsSameRepository(entry, EffectiveNightlyOptiScalerRepo);
+            if (entry.IsBeta)
+                return !IsChineseOptiScalerSource && IsSameRepository(entry, _config.OptiScalerBetas);
+            return IsSameRepository(entry, EffectiveStableOptiScalerRepo);
+        }
+
+        /// <summary>
+        /// Switches between upstream OptiScaler and the Chinese OptiScaler_chs releases. Release
+        /// metadata and extracted files are kept source-specific so a v0.9.4 from one repository
+        /// can never be mistaken for the identically tagged v0.9.4 from the other.
+        /// </summary>
+        public void SetOptiScalerSource(string source)
+        {
+            var normalized = string.Equals(source, ChineseOptiScalerSource, StringComparison.OrdinalIgnoreCase)
+                ? ChineseOptiScalerSource
+                : OfficialOptiScalerSource;
+            if (string.Equals(_config.OptiScalerSource, normalized, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            _config.OptiScalerSource = normalized;
+
+            // A source switch must not wait for the normal 15-minute release-check cooldown.
+            _config.LastApiCheckTime = null;
+            _lastApiCheckTime = DateTime.MinValue;
+            LastError = null;
+            SaveConfiguration();
+            RebuildInMemoryCacheFromReleases();
+            OnStatusChanged?.Invoke();
+        }
+
         /// <summary>
         /// Effective OptiScaler default: the explicitly pinned version, or — when auto-latest is on —
         /// the latest version in Config.DefaultOptiScalerChannel (the tab that was showing in Manage
@@ -340,6 +392,7 @@ namespace OptiscalerClient.Services
 
                 if (!string.IsNullOrEmpty(template.App.RepoOwner))            target.App            = template.App;
                 if (!string.IsNullOrEmpty(template.OptiScaler.RepoOwner))     target.OptiScaler     = template.OptiScaler;
+                if (!string.IsNullOrEmpty(template.OptiScalerChinese.RepoOwner)) target.OptiScalerChinese = template.OptiScalerChinese;
                 if (!string.IsNullOrEmpty(template.OptiScalerBetas.RepoOwner))target.OptiScalerBetas= template.OptiScalerBetas;
                 if (!string.IsNullOrEmpty(template.OptiScalerNightly.RepoOwner)) target.OptiScalerNightly = template.OptiScalerNightly;
                 if (!string.IsNullOrEmpty(template.Streamline.RepoOwner))       target.Streamline     = template.Streamline;
@@ -353,6 +406,13 @@ namespace OptiscalerClient.Services
 
                 if (target.ScanExclusions.Count == 0 && template.ScanExclusions.Count > 0)
                     target.ScanExclusions = template.ScanExclusions;
+
+                target.OptiScalerSource = string.Equals(
+                    target.OptiScalerSource, ChineseOptiScalerSource, StringComparison.OrdinalIgnoreCase)
+                    ? ChineseOptiScalerSource
+                    : OfficialOptiScalerSource;
+                target.Network.GitHubMirrorPrefix =
+                    NetworkService.NormalizeGitHubMirrorPrefix(target.Network.GitHubMirrorPrefix);
             }
             catch (Exception ex)
         {
@@ -412,6 +472,16 @@ namespace OptiscalerClient.Services
                 if (loaded != null)
                 {
                     _releasesCache = loaded;
+                    // Older caches predate SourceRepository. Their entries came from the
+                    // official repositories, so assign that source before filtering.
+                    foreach (var entry in _releasesCache.Releases)
+                    {
+                        if (!string.IsNullOrWhiteSpace(entry.SourceRepository))
+                            continue;
+                        entry.SourceRepository = RepoKey(entry.IsNightly
+                            ? _config.OptiScalerNightly
+                            : _config.OptiScaler);
+                    }
                     RebuildInMemoryCacheFromReleases();
                     DebugWindow.Log($"[ReleasesCache] Loaded {_releasesCache.Releases.Count} entries from local cache (last updated: {_releasesCache.LastUpdated})");
                 }
@@ -551,44 +621,47 @@ namespace OptiscalerClient.Services
         /// </summary>
         private void MergeIntoReleasesCache(System.Collections.Generic.IEnumerable<OptiScalerReleaseEntry> newEntries)
         {
-            var existingVersions = new System.Collections.Generic.HashSet<string>(
-                _releasesCache.Releases.Select(r => r.Version),
-                StringComparer.OrdinalIgnoreCase);
+            var entries = newEntries.ToList();
+            if (entries.Count == 0) return;
 
             // Only reset a channel that was actually fetched. This keeps a cached Nightly
             // selectable if GitHub temporarily fails for that one repository.
-            bool hasStableEntries = newEntries.Any(r => !r.IsBeta && !r.IsNightly);
-            bool hasBetaEntries = newEntries.Any(r => r.IsBeta && !r.IsNightly);
-            bool hasNightlyEntries = newEntries.Any(r => r.IsNightly);
+            var fetchedRepositories = new System.Collections.Generic.HashSet<string>(
+                entries.Select(r => r.SourceRepository ?? string.Empty),
+                StringComparer.OrdinalIgnoreCase);
+            bool hasStableEntries = entries.Any(r => !r.IsBeta && !r.IsNightly);
+            bool hasBetaEntries = entries.Any(r => r.IsBeta && !r.IsNightly);
+            bool hasNightlyEntries = entries.Any(r => r.IsNightly);
             foreach (var existing in _releasesCache.Releases)
             {
+                if (!fetchedRepositories.Contains(existing.SourceRepository ?? string.Empty))
+                    continue;
                 if (hasStableEntries) existing.IsLatestStable = false;
                 if (hasBetaEntries) existing.IsLatestBeta = false;
                 if (hasNightlyEntries) existing.IsLatestNightly = false;
             }
 
-            foreach (var entry in newEntries)
+            foreach (var entry in entries)
             {
-                if (!existingVersions.Contains(entry.Version))
+                var existing = _releasesCache.Releases.FirstOrDefault(r =>
+                    string.Equals(r.Version, entry.Version, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(r.SourceRepository, entry.SourceRepository, StringComparison.OrdinalIgnoreCase));
+                if (existing == null)
                 {
                     _releasesCache.Releases.Add(entry);
-                    existingVersions.Add(entry.Version);
                 }
                 else
                 {
-                    // Update download URL and flags for existing entry if missing
-                    var existing = _releasesCache.Releases.FirstOrDefault(
-                        r => string.Equals(r.Version, entry.Version, StringComparison.OrdinalIgnoreCase));
-                    if (existing != null)
-                    {
-                        if (string.IsNullOrEmpty(existing.DownloadUrl))
-                            existing.DownloadUrl = entry.DownloadUrl;
-                        existing.IsLatestStable = entry.IsLatestStable;
-                        existing.IsLatestBeta = entry.IsLatestBeta;
-                        existing.IsLatestNightly = entry.IsLatestNightly;
-                        existing.IsBeta = entry.IsBeta;
-                        existing.IsNightly = entry.IsNightly;
-                    }
+                    // Refresh the URL on every successful fetch: the official and CHS repos can
+                    // publish identical tags with different archives, and a stale URL would install
+                    // the wrong build.
+                    if (!string.IsNullOrEmpty(entry.DownloadUrl))
+                        existing.DownloadUrl = entry.DownloadUrl;
+                    existing.IsLatestStable = entry.IsLatestStable;
+                    existing.IsLatestBeta = entry.IsLatestBeta;
+                    existing.IsLatestNightly = entry.IsLatestNightly;
+                    existing.IsBeta = entry.IsBeta;
+                    existing.IsNightly = entry.IsNightly;
                 }
             }
 
@@ -634,9 +707,28 @@ namespace OptiscalerClient.Services
 
         private void RebuildInMemoryCacheFromReleases()
         {
+            _cachedOptiScalerVersions = new System.Collections.Generic.List<string>();
+            _cachedBetaVersions = new System.Collections.Generic.HashSet<string>();
+            _cachedNightlyVersions = new System.Collections.Generic.HashSet<string>();
+            _cachedLatestBetaVersion = null;
+            _cachedLatestNightlyVersion = null;
+            _cachedLatestStableVersion = null;
             if (_releasesCache.Releases.Count == 0) return;
 
-            var all = _releasesCache.Releases;
+            var stableRepoKey = RepoKey(EffectiveStableOptiScalerRepo);
+            var betaRepoKey = IsChineseOptiScalerSource ? null : RepoKey(_config.OptiScalerBetas);
+            var nightlyRepoKey = RepoKey(EffectiveNightlyOptiScalerRepo);
+
+            bool FromRepo(OptiScalerReleaseEntry entry, string? repoKey) =>
+                repoKey != null &&
+                string.Equals(entry.SourceRepository, repoKey, StringComparison.OrdinalIgnoreCase);
+
+            var all = _releasesCache.Releases
+                .Where(r =>
+                    (!r.IsBeta && !r.IsNightly && FromRepo(r, stableRepoKey)) ||
+                    (r.IsBeta && !r.IsNightly && FromRepo(r, betaRepoKey)) ||
+                    (r.IsNightly && FromRepo(r, nightlyRepoKey)))
+                .ToList();
 
             var stablesList = all.Where(r => !r.IsBeta && !r.IsNightly)
                                  .OrderByDescending(r => ParseVersionForSort(r.Version))
@@ -798,11 +890,18 @@ namespace OptiscalerClient.Services
                     {
                         // Stagger requests by 150 ms each to avoid triggering GitHub's burst
                         // detection while keeping the UI responsive.
-                        var optiVersionsTask = FetchOptiScalerReleasesSafelyAsync(_config.OptiScaler, isBeta: false);
+                        var optiVersionsTask = IsChineseOptiScalerSource
+                            ? FetchLatestStableReleaseSafelyAsync(EffectiveStableOptiScalerRepo)
+                            : FetchOptiScalerReleasesSafelyAsync(EffectiveStableOptiScalerRepo, isBeta: false);
                         await Task.Delay(150);
-                        var optiBetasTask = FetchOptiScalerReleasesSafelyAsync(_config.OptiScalerBetas, isBeta: true);
+                        var optiBetasTask = IsChineseOptiScalerSource
+                            ? Task.FromResult(new System.Collections.Generic.List<OptiScalerReleaseEntry>())
+                            : FetchOptiScalerReleasesSafelyAsync(_config.OptiScalerBetas, isBeta: true);
                         await Task.Delay(150);
-                        var optiNightlyTask = FetchOptiScalerReleasesSafelyAsync(_config.OptiScalerNightly, isBeta: false, isNightly: true);
+                        var optiNightlyTask = FetchOptiScalerReleasesSafelyAsync(
+                            EffectiveNightlyOptiScalerRepo,
+                            isBeta: false,
+                            isNightly: true);
                         await Task.Delay(150);
                         var fakeTask = FetchFakenvapiReleasesAsync();
                         await Task.Delay(150);
@@ -978,6 +1077,11 @@ namespace OptiscalerClient.Services
                     if (version.StartsWith("v", StringComparison.OrdinalIgnoreCase))
                         version = version.Substring(1);
 
+                    bool isPrerelease = element.TryGetProperty("prerelease", out var pr) && pr.GetBoolean();
+                    // A nightly channel must contain only nightly tags. This matters when both
+                    // channels point at OptiScaler_chs, whose release list mixes v0.9.4 and nightly-*.
+                    if (isNightly && !version.Contains("nightly", StringComparison.OrdinalIgnoreCase))
+                        continue;
                     // Find best download URL from assets
                     string? downloadUrl = null;
                     if (element.TryGetProperty("assets", out var assets))
@@ -997,8 +1101,6 @@ namespace OptiscalerClient.Services
                             }
                         }
                     }
-
-                    bool isPrerelease = element.TryGetProperty("prerelease", out var pr) && pr.GetBoolean();
 
                     bool isThisLatestStable = false;
                     bool isThisLatestBeta = false;
@@ -1033,6 +1135,7 @@ namespace OptiscalerClient.Services
                     {
                         Version = version,
                         DownloadUrl = downloadUrl,
+                        SourceRepository = repoLabel,
                         IsBeta = isBeta,
                         IsNightly = isNightly,
                         IsLatestStable = isThisLatestStable,
@@ -1065,6 +1168,66 @@ namespace OptiscalerClient.Services
                 DebugWindow.Log($"[FetchVersions] Keeping cached releases for {config.RepoOwner}/{config.RepoName}: {ex.Message}");
                 return new System.Collections.Generic.List<OptiScalerReleaseEntry>();
             }
+        }
+
+        /// <summary>
+        /// OptiScaler_chs publishes nightly builds much more often than stable releases. Its latest
+        /// stable release can fall outside the first page of the release list, so query GitHub's
+        /// /releases/latest endpoint when the Chinese source supplies the Stable channel.
+        /// </summary>
+        private async Task<System.Collections.Generic.List<OptiScalerReleaseEntry>> FetchLatestStableReleaseSafelyAsync(
+            RepositoryConfig config)
+        {
+            var entries = new System.Collections.Generic.List<OptiScalerReleaseEntry>();
+            if (string.IsNullOrWhiteSpace(config.RepoOwner) || string.IsNullOrWhiteSpace(config.RepoName))
+                return entries;
+
+            try
+            {
+                var url = $"https://api.github.com/repos/{config.RepoOwner}/{config.RepoName}/releases/latest";
+                var response = await GetWithRetryAsync(() => _httpClient, url);
+                response.EnsureSuccessStatusCode();
+                using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+                if (doc.RootElement.ValueKind != JsonValueKind.Object ||
+                    !doc.RootElement.TryGetProperty("tag_name", out var tagName))
+                    return entries;
+
+                var version = tagName.GetString();
+                if (string.IsNullOrWhiteSpace(version)) return entries;
+                if (version.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+                    version = version[1..];
+
+                string? downloadUrl = null;
+                if (doc.RootElement.TryGetProperty("assets", out var assets))
+                {
+                    foreach (var asset in assets.EnumerateArray())
+                    {
+                        if (!asset.TryGetProperty("browser_download_url", out var urlProp)) continue;
+                        var assetUrl = urlProp.GetString();
+                        if (assetUrl != null &&
+                            (assetUrl.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) ||
+                             assetUrl.EndsWith(".7z", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            downloadUrl = assetUrl;
+                            break;
+                        }
+                    }
+                }
+
+                entries.Add(new OptiScalerReleaseEntry
+                {
+                    Version = version,
+                    DownloadUrl = downloadUrl,
+                    SourceRepository = RepoKey(config),
+                    IsLatestStable = true,
+                });
+            }
+            catch (Exception ex)
+            {
+                DebugWindow.Log($"[FetchVersions] Latest stable for {RepoKey(config)} failed: {ex.Message}");
+            }
+
+            return entries;
         }
 
         // Legacy helper kept for CheckComponentUpdateAsync compatibility
@@ -2853,29 +3016,32 @@ namespace OptiscalerClient.Services
 
             try
             {
-                // 1. Try to get the download URL from the local releases cache first
-                string? cachedDownloadUrl = _releasesCache.Releases
-                    .FirstOrDefault(r => string.Equals(r.Version, version, StringComparison.OrdinalIgnoreCase))
-                    ?.DownloadUrl;
+                // 1. Try to get the download URL from the local releases cache first.
+                // Only the active source's entry is valid: upstream and OptiScaler_chs both use
+                // tags such as v0.9.4, but their archives are different.
+                var cachedEntry = _releasesCache.Releases.FirstOrDefault(r =>
+                    IsEntryFromActiveOptiScalerSource(r) &&
+                    string.Equals(r.Version, version, StringComparison.OrdinalIgnoreCase));
+                string? cachedDownloadUrl = cachedEntry?.DownloadUrl;
 
                 // 2. Resolve the release in its channel. Nightly tags deliberately do not have a
                 // semantic version or a v prefix, so the plain tag is always attempted too.
                 HttpResponseMessage? response = null;
                 string? json = null;
                 string repoSource = "";
+                string repoSourceRepository = "";
 
                 bool apiAvailable = true;
                 try
                 {
-                    var cachedEntry = _releasesCache.Releases.FirstOrDefault(
-                        r => string.Equals(r.Version, version, StringComparison.OrdinalIgnoreCase));
                     var repositories = cachedEntry?.IsNightly == true
-                        ? new[] { (Config: _config.OptiScalerNightly, Label: "nightly") }
+                        ? new[] { (Config: EffectiveNightlyOptiScalerRepo, Label: "nightly") }
+                        : cachedEntry?.IsBeta == true
+                        ? new[] { (Config: _config.OptiScalerBetas, Label: "beta") }
                         : new[]
                         {
-                            (Config: _config.OptiScaler, Label: "stable"),
-                            (Config: _config.OptiScalerBetas, Label: "beta"),
-                            (Config: _config.OptiScalerNightly, Label: "nightly")
+                            (Config: EffectiveStableOptiScalerRepo, Label: "stable"),
+                            (Config: EffectiveNightlyOptiScalerRepo, Label: "nightly")
                         };
 
                     foreach (var repository in repositories)
@@ -2892,6 +3058,7 @@ namespace OptiscalerClient.Services
                             if (!response.IsSuccessStatusCode) continue;
 
                             repoSource = $" ({repository.Label} repo)";
+                            repoSourceRepository = RepoKey(repository.Config);
                             json = await response.Content.ReadAsStringAsync();
                             break;
                         }
@@ -2927,7 +3094,8 @@ namespace OptiscalerClient.Services
 
                                     // Update cached URL if different/missing
                                     var cacheEntry = _releasesCache.Releases.FirstOrDefault(
-                                        r => string.Equals(r.Version, version, StringComparison.OrdinalIgnoreCase));
+                                        r => string.Equals(r.Version, version, StringComparison.OrdinalIgnoreCase) &&
+                                             string.Equals(r.SourceRepository, repoSourceRepository, StringComparison.OrdinalIgnoreCase));
                                     if (cacheEntry != null && string.IsNullOrEmpty(cacheEntry.DownloadUrl))
                                     {
                                         cacheEntry.DownloadUrl = downloadUrl;
@@ -3146,7 +3314,9 @@ namespace OptiscalerClient.Services
                 return false;
 
             return _cachedNightlyVersions.Contains(version) || _releasesCache.Releases.Any(r =>
-                r.IsNightly && string.Equals(r.Version, version, StringComparison.OrdinalIgnoreCase));
+                r.IsNightly &&
+                IsEntryFromActiveOptiScalerSource(r) &&
+                string.Equals(r.Version, version, StringComparison.OrdinalIgnoreCase));
         }
 
         public string GetStreamlineCachePath(string version)
@@ -3422,8 +3592,22 @@ namespace OptiscalerClient.Services
             }
         }
 
-        public string GetOptiScalerCachePath() => Path.Combine(_cacheDir, "OptiScaler", OptiScalerVersion ?? "latest");
-        public string GetOptiScalerCachePath(string version) => Path.Combine(_cacheDir, "OptiScaler", version);
+        private string GetOptiScalerSourceCacheRoot()
+        {
+            var root = Path.Combine(_cacheDir, "OptiScaler");
+            return IsChineseOptiScalerSource ? Path.Combine(root, "CHS") : root;
+        }
+
+        public string GetOptiScalerCachePath() => GetOptiScalerCachePath(OptiScalerVersion ?? "latest");
+        public string GetOptiScalerCachePath(string version)
+        {
+            // Custom imports live in the source-neutral root and keep working regardless of
+            // whether the user is currently on the official or Chinese release source.
+            var root = _config.CustomOptiScalerVersions.Contains(version, StringComparer.OrdinalIgnoreCase)
+                ? Path.Combine(_cacheDir, "OptiScaler")
+                : GetOptiScalerSourceCacheRoot();
+            return Path.Combine(root, version);
+        }
         public string GetFakenvapiCachePath() => Path.Combine(_cacheDir, "Fakenvapi");
         /// <summary>Returns the cache directory for NukemFG files (legacy flat path).</summary>
         public string GetNukemFGCachePath() => Path.Combine(_cacheDir, "NukemFG");
@@ -3435,7 +3619,7 @@ namespace OptiscalerClient.Services
         public System.Collections.Generic.List<string> GetDownloadedOptiScalerVersions()
         {
             var versions = new System.Collections.Generic.List<string>();
-            var cachePath = Path.Combine(_cacheDir, "OptiScaler");
+            var cachePath = GetOptiScalerSourceCacheRoot();
             if (Directory.Exists(cachePath))
             {
                 foreach (var dir in Directory.GetDirectories(cachePath))
@@ -3455,6 +3639,17 @@ namespace OptiscalerClient.Services
                     }
                 }
             }
+
+            if (IsChineseOptiScalerSource)
+            {
+                foreach (var custom in _config.CustomOptiScalerVersions)
+                {
+                    if (Directory.Exists(Path.Combine(_cacheDir, "OptiScaler", custom)) &&
+                        !versions.Contains(custom, StringComparer.OrdinalIgnoreCase))
+                        versions.Add(custom);
+                }
+            }
+
             // Better to sort by length and alpha descending:
             versions.Sort((a, b) =>
             {
@@ -3467,7 +3662,7 @@ namespace OptiscalerClient.Services
 
         public void DeleteOptiScalerCache(string version)
         {
-            var cachePath = Path.Combine(_cacheDir, "OptiScaler", version);
+            var cachePath = GetOptiScalerCachePath(version);
             if (Directory.Exists(cachePath))
             {
                 Directory.Delete(cachePath, true);

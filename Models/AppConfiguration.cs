@@ -42,6 +42,10 @@ namespace OptiscalerClient.Models
     {
         /// <summary>When true (default), the OS proxy / HTTP_PROXY env vars are used. When false, the explicit settings below apply.</summary>
         public bool UseSystemProxy { get; set; } = true;
+        /// <summary>When true, GitHub API and release asset URLs are routed through <see cref="GitHubMirrorPrefix"/>.</summary>
+        public bool UseGitHubMirror { get; set; } = false;
+        /// <summary>Prefix of the GitHub mirror, for example https://gh-proxy.com/.</summary>
+        public string GitHubMirrorPrefix { get; set; } = "https://gh-proxy.com/";
         /// <summary>Proxy protocol: "HTTPS" (HTTP CONNECT tunneling) or "SOCKS5".</summary>
         public string ProxyType { get; set; } = "HTTPS";
         /// <summary>Proxy server hostname or IP address.</summary>
@@ -89,6 +93,8 @@ namespace OptiscalerClient.Models
     {
         public RepositoryConfig App { get; set; } = new();
         public RepositoryConfig OptiScaler { get; set; } = new();
+        /// <summary>Chinese OptiScaler fork used when <see cref="OptiScalerSource"/> is "chinese".</summary>
+        public RepositoryConfig OptiScalerChinese { get; set; } = new();
         public RepositoryConfig OptiScalerBetas { get; set; } = new();
         public RepositoryConfig OptiScalerNightly { get; set; } = new();
         public RepositoryConfig Streamline { get; set; } = new();
@@ -101,6 +107,8 @@ namespace OptiscalerClient.Models
         public RepositoryConfig DlssEnablerMirror { get; set; } = new();
         public string Language { get; set; } = "en";
         public bool Debug { get; set; } = false;
+        /// <summary>OptiScaler release source: "official" (optiscaler/OptiScaler) or "chinese" (deYangar/OptiScaler_chs).</summary>
+        public string OptiScalerSource { get; set; } = "official";
         public string DefaultProfileName { get; set; } = OptiScalerProfile.BuiltInDefaultName;
         public bool AnimationsEnabled { get; set; } = true;
         public bool PreferGridView { get; set; } = true;
@@ -362,6 +370,8 @@ namespace OptiscalerClient.Models
     {
         public string Version { get; set; } = string.Empty;
         public string? DownloadUrl { get; set; }
+        /// <summary>owner/repo that published this release, used to keep official and CHS caches distinct.</summary>
+        public string? SourceRepository { get; set; }
         public bool IsBeta { get; set; }
         /// <summary>Nightly builds are intentionally separate from beta prereleases.</summary>
         public bool IsNightly { get; set; }

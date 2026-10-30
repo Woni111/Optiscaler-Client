@@ -15,8 +15,11 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using OptiscalerClient.Models;
 
 namespace OptiscalerClient.Services
@@ -28,6 +31,15 @@ namespace OptiscalerClient.Services
     /// </summary>
     public static class NetworkService
     {
+        private static readonly string[] MirrorableGitHubHosts =
+        {
+            "api.github.com",
+            "github.com",
+            "codeload.github.com",
+            "raw.githubusercontent.com",
+            "gist.githubusercontent.com",
+        };
+
         private static readonly object _lock = new();
         private static HttpClient _httpClient = BuildClient(null);
 
@@ -51,7 +63,7 @@ namespace OptiscalerClient.Services
 
         private static HttpClient BuildClient(NetworkConfig? config)
         {
-            var handler = new HttpClientHandler
+            var transport = new HttpClientHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             };
@@ -74,25 +86,94 @@ namespace OptiscalerClient.Services
                             config.ProxyUsername,
                             config.ProxyPassword ?? string.Empty);
                     }
-                    handler.Proxy = proxy;
-                    handler.UseProxy = true;
+                    transport.Proxy = proxy;
+                    transport.UseProxy = true;
                 }
                 catch
                 {
                     // Invalid proxy settings — fall back to system proxy silently.
-                    handler.UseProxy = true;
+                    transport.UseProxy = true;
                 }
             }
             else
             {
                 // Honor system proxy or HTTP_PROXY / HTTPS_PROXY env vars.
-                handler.UseProxy = true;
+                transport.UseProxy = true;
             }
 
+            HttpMessageHandler handler = config == null
+                ? transport
+                : new GitHubMirrorHandler(transport, config);
             var client = new HttpClient(handler, disposeHandler: true);
             client.DefaultRequestHeaders.UserAgent.ParseAdd("OptiscalerClient/1.0");
             client.Timeout = TimeSpan.FromSeconds(30);
             return client;
+        }
+
+        /// <summary>
+        /// Normalizes a mirror prefix entered in Settings. A bare host gets https://, a trailing
+        /// slash is enforced, and the web-UI form "https://gh-proxy.com/#https://..." is reduced
+        /// to its usable proxy prefix.
+        /// </summary>
+        public static string NormalizeGitHubMirrorPrefix(string? value)
+        {
+            const string fallback = "https://gh-proxy.com/";
+            var prefix = (value ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(prefix)) return fallback;
+
+            var hashIndex = prefix.IndexOf("#http", StringComparison.OrdinalIgnoreCase);
+            if (hashIndex > 0) prefix = prefix[..hashIndex];
+            prefix = prefix.TrimEnd('#', '/');
+
+            if (!prefix.Contains("://", StringComparison.Ordinal))
+                prefix = "https://" + prefix.TrimStart('/');
+
+            if (!Uri.TryCreate(prefix + "/", UriKind.Absolute, out var uri) ||
+                (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+                return fallback;
+
+            return uri.AbsoluteUri;
+        }
+
+        /// <summary>Returns the mirror URL for a supported GitHub URL, or <paramref name="url"/> unchanged.</summary>
+        public static string GetMirroredGitHubUrl(string url, NetworkConfig config)
+        {
+            if (!config.UseGitHubMirror || string.IsNullOrWhiteSpace(url))
+                return url;
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var original))
+                return url;
+            if (!MirrorableGitHubHosts.Contains(original.Host, StringComparer.OrdinalIgnoreCase))
+                return url;
+
+            var prefix = NormalizeGitHubMirrorPrefix(config.GitHubMirrorPrefix);
+            if (url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                return url;
+
+            return prefix + original.AbsoluteUri;
+        }
+
+        private sealed class GitHubMirrorHandler : DelegatingHandler
+        {
+            private readonly NetworkConfig _config;
+
+            public GitHubMirrorHandler(HttpMessageHandler innerHandler, NetworkConfig config)
+                : base(innerHandler)
+            {
+                _config = config;
+            }
+
+            protected override Task<HttpResponseMessage> SendAsync(
+                HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                if (request.RequestUri != null)
+                {
+                    var mirrored = GetMirroredGitHubUrl(request.RequestUri.AbsoluteUri, _config);
+                    if (!string.Equals(mirrored, request.RequestUri.AbsoluteUri, StringComparison.Ordinal))
+                        request.RequestUri = new Uri(mirrored, UriKind.Absolute);
+                }
+
+                return base.SendAsync(request, cancellationToken);
+            }
         }
     }
 }
