@@ -794,7 +794,7 @@
     <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
     <x:String x:Key="TxtOptiScalerSource">OptiScaler 發佈來源</x:String>
     <x:String x:Key="TxtOptiScalerSourceOfficial">官方（optiscaler/OptiScaler）</x:String>
-    <x:String x:Key="TxtOptiScalerSourceChinese">漢化版（deYangar/OptiScaler_chs）</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">漢化版（Woni111/OptiScaler_chs）</x:String>
     <x:String x:Key="TxtOptiScalerSourceDesc">漢化來源會安裝 OptiScaler_chs 的翻譯版本。穩定版與夜間版通道皆跟隨此選擇，快取檔案與官方來源分開保存。</x:String>
 
     <!-- Welcome popup -->

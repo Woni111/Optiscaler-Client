@@ -787,7 +787,7 @@
     <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
     <x:String x:Key="TxtOptiScalerSource">OptiScaler 소스</x:String>
     <x:String x:Key="TxtOptiScalerSourceOfficial">공식 (optiscaler/OptiScaler)</x:String>
-    <x:String x:Key="TxtOptiScalerSourceChinese">중국어판 (deYangar/OptiScaler_chs)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">중국어판 (Woni111/OptiScaler_chs)</x:String>
     <x:String x:Key="TxtOptiScalerSourceDesc">중국어판 소스는 OptiScaler_chs의 번역된 빌드를 설치합니다. 안정 및 야간 채널이 이 선택을 따르며 캐시는 공식 소스와 분리됩니다.</x:String>
 
     <!-- Welcome popup -->

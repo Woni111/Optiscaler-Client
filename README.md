@@ -1,6 +1,6 @@
 # ✦ OptiScaler Client
 
-[![GitHub Release](https://img.shields.io/github/v/release/Optiscaler-Client/Optiscaler-Client?style=flat-square&color=8A2BE2)](https://github.com/Optiscaler-Client/Optiscaler-Client/releases/tag/OptiscalerClient-1.0.8)
+[![GitHub Release](https://img.shields.io/github/v/release/Woni111/Optiscaler-Client?style=flat-square&color=8A2BE2)](https://github.com/Woni111/Optiscaler-Client/releases)
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/License-GPL--3.0--or--later-yellow.svg?style=flat-square)](LICENSE)
 [![Platform: Windows](https://img.shields.io/badge/Platform-Windows-0078D4?style=flat-square&logo=windows)](https://www.microsoft.com/windows)
 [![Platform: Linux](https://img.shields.io/badge/Platform-Linux-E95420?style=flat-square&logo=linux)](https://www.linux.org)
@@ -89,8 +89,9 @@ Optional integrations, enabled from **Settings → Experimental**:
 - Supports system proxy settings and `HTTP_PROXY` / `HTTPS_PROXY` environment variables.
 - Also supports explicit proxy configuration from app settings (including auth when required).
 - Optional GitHub mirror prefix (for example `https://gh-proxy.com/`) for API requests and release downloads.
-- Switch the OptiScaler release source between the official repository and the Chinese `deYangar/OptiScaler_chs` builds.
-- Stable and nightly CHS downloads use a separate cache namespace, so identically tagged official and translated builds do not overwrite each other.
+- Switch the OptiScaler release source between the official repository and the Chinese [`Woni111/OptiScaler_chs`](https://github.com/Woni111/OptiScaler_chs) builds.
+- The Chinese source supports both translated upstream stable releases and translated nightly prereleases as they are published.
+- Stable and nightly CHS downloads use a source-specific cache namespace, so identically tagged official, translated, and old-source builds do not overwrite each other.
 - Network settings are persisted in app configuration.
 
 ### Settings & Customization
@@ -168,7 +169,7 @@ Full interface translation in **14 languages**:
 
 ### Instructions
 
-1. Download the latest release asset from [Releases](https://github.com/Optiscaler-Client/Optiscaler-Client/releases).
+1. Download the latest release asset from [Releases](https://github.com/Woni111/Optiscaler-Client/releases).
 2. Extract the package.
 3. Run `OptiscalerClient.exe`.
 
@@ -189,7 +190,7 @@ Full interface translation in **14 languages**:
 #### Clone & Run
 
 ```bash
-git clone https://github.com/Optiscaler-Client/Optiscaler-Client.git
+git clone https://github.com/Woni111/Optiscaler-Client.git
 cd Optiscaler-Client
 
 # Build the project
@@ -247,7 +248,7 @@ Yes, OptiScaler Client is completely safe and open-source. However, some antivir
 
 ### What you can do
 
-1. **Verify the Source**: Download only from official [GitHub Releases](https://github.com/Optiscaler-Client/Optiscaler-Client/releases)
+1. **Verify the Source**: Download only from the [GitHub Releases](https://github.com/Woni111/Optiscaler-Client/releases)
 2. **Check VirusTotal**: Upload the file to [VirusTotal.com](https://www.virustotal.com) — most reputable AVs will show clean
 3. **Review the Code**: This is open-source — you can inspect all code before running
 4. **Add Exception**: Whitelist `OptiscalerClient.exe` in your antivirus settings

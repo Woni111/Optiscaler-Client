@@ -440,7 +440,7 @@ Esta versión no está disponible para descarga. Verificá tu conexión a intern
     <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
     <x:String x:Key="TxtOptiScalerSource">Origen de OptiScaler</x:String>
     <x:String x:Key="TxtOptiScalerSourceOfficial">Oficial (optiscaler/OptiScaler)</x:String>
-    <x:String x:Key="TxtOptiScalerSourceChinese">Chino (deYangar/OptiScaler_chs)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">Chino (Woni111/OptiScaler_chs)</x:String>
     <x:String x:Key="TxtOptiScalerSourceDesc">El origen chino instala las compilaciones traducidas de OptiScaler_chs. Las versiones estable y nocturna siguen esta selección y las cachés se mantienen separadas.</x:String>
 
     <x:String x:Key="TxtViewGrid">Vista de cuadrícula</x:String>

@@ -107,7 +107,7 @@ namespace OptiscalerClient.Models
         public RepositoryConfig DlssEnablerMirror { get; set; } = new();
         public string Language { get; set; } = "en";
         public bool Debug { get; set; } = false;
-        /// <summary>OptiScaler release source: "official" (optiscaler/OptiScaler) or "chinese" (deYangar/OptiScaler_chs).</summary>
+        /// <summary>OptiScaler release source: "official" (optiscaler/OptiScaler) or "chinese" (Woni111/OptiScaler_chs).</summary>
         public string OptiScalerSource { get; set; } = "official";
         public string DefaultProfileName { get; set; } = OptiScalerProfile.BuiltInDefaultName;
         public bool AnimationsEnabled { get; set; } = true;

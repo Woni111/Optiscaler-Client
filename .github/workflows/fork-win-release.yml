@@ -26,8 +26,7 @@ jobs:
           $match = Select-String -Path OptiscalerClient.csproj -Pattern '<Version>([^<]+)</Version>'
           if (-not $match) { throw "Version not found in OptiscalerClient.csproj" }
           $version = $match.Matches[0].Groups[1].Value
-          $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
-          $tag = "fork-v$version-mirror-chs-$stamp"
+          $tag = "OptiscalerClient-$version"
           $asset = "OptiscalerClient-$version-win-x64.zip"
           "version=$version" >> $env:GITHUB_OUTPUT
           "tag=$tag" >> $env:GITHUB_OUTPUT
@@ -56,9 +55,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.meta.outputs.tag }}
-          name: Optiscaler Client ${{ steps.meta.outputs.version }} (mirror + CHS fork)
+          name: Optiscaler Client ${{ steps.meta.outputs.version }} (mirror + CHS)
           body: |
-            Fork build with GitHub mirror support and the OptiScaler / OptiScaler_chs source selector.
+            Fork build with GitHub mirror support and the official / `Woni111/OptiScaler_chs`
+            release source selector. The Chinese source supports translated stable releases and
+            translated nightly prereleases, with source-specific caches.
 
             Built from `${{ github.ref_name }}` at `${{ github.sha }}`.
           files: dist/${{ steps.meta.outputs.asset }}

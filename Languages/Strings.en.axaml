@@ -440,7 +440,7 @@ This version is unavailable for download. Check your internet connection and try
     <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
     <x:String x:Key="TxtOptiScalerSource">OptiScaler source</x:String>
     <x:String x:Key="TxtOptiScalerSourceOfficial">Official (optiscaler/OptiScaler)</x:String>
-    <x:String x:Key="TxtOptiScalerSourceChinese">Chinese (deYangar/OptiScaler_chs)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">Chinese (Woni111/OptiScaler_chs)</x:String>
     <x:String x:Key="TxtOptiScalerSourceDesc">The Chinese source installs translated builds from OptiScaler_chs. Stable and nightly channels follow this selection, and cached files are kept separate from the official source.</x:String>
 
     <x:String x:Key="TxtViewGrid">Grid view</x:String>

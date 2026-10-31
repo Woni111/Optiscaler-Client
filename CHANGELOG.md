@@ -1,3 +1,20 @@
+#### [1.0.9] ####
+
+# What's Changed
+
+The OptiScaler release source selector now points to the maintained `Woni111/OptiScaler_chs`
+translation repository. Translated stable releases and nightly prereleases are kept in separate
+channels, and each source repository gets its own cache so builds with identical tags cannot
+overwrite one another.
+
+# Changelog
+
+### New
+
+- Added `Woni111/OptiScaler_chs` as the Chinese OptiScaler release source.
+- Added stable-channel support for future translated upstream releases while retaining nightly prereleases.
+- Isolated translated OptiScaler caches by source repository to prevent cross-source archive mix-ups.
+
 #### [1.0.8] ####
 
 # What’s Changed

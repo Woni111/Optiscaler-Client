@@ -806,7 +806,7 @@ Questa versione non è disponibile per il download. Controlla la tua connessione
     <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
     <x:String x:Key="TxtOptiScalerSource">Origine OptiScaler</x:String>
     <x:String x:Key="TxtOptiScalerSourceOfficial">Ufficiale (optiscaler/OptiScaler)</x:String>
-    <x:String x:Key="TxtOptiScalerSourceChinese">Cinese (deYangar/OptiScaler_chs)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">Cinese (Woni111/OptiScaler_chs)</x:String>
     <x:String x:Key="TxtOptiScalerSourceDesc">L’origine cinese installa le build tradotte di OptiScaler_chs. I canali stable e nightly seguono questa scelta e le cache restano separate.</x:String>
 
     <!-- Welcome popup -->

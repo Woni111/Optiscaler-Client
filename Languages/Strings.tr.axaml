@@ -785,7 +785,7 @@ Bu sürüm indirilemez. İnternet bağlantınızı kontrol edip daha sonra tekra
     <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
     <x:String x:Key="TxtOptiScalerSource">OptiScaler kaynağı</x:String>
     <x:String x:Key="TxtOptiScalerSourceOfficial">Resmî (optiscaler/OptiScaler)</x:String>
-    <x:String x:Key="TxtOptiScalerSourceChinese">Çince (deYangar/OptiScaler_chs)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">Çince (Woni111/OptiScaler_chs)</x:String>
     <x:String x:Key="TxtOptiScalerSourceDesc">Çince kaynak, OptiScaler_chs içindeki çevrilmiş derlemeleri yükler. Stable ve Nightly kanalları bu seçimi izler ve önbellekler ayrı tutulur.</x:String>
 
     <!-- Welcome popup -->

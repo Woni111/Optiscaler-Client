@@ -786,7 +786,7 @@
     <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
     <x:String x:Key="TxtOptiScalerSource">Источник OptiScaler</x:String>
     <x:String x:Key="TxtOptiScalerSourceOfficial">Официальный (optiscaler/OptiScaler)</x:String>
-    <x:String x:Key="TxtOptiScalerSourceChinese">Китайский (deYangar/OptiScaler_chs)</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">Китайский (Woni111/OptiScaler_chs)</x:String>
     <x:String x:Key="TxtOptiScalerSourceDesc">Китайский источник устанавливает переведённые сборки OptiScaler_chs. Каналы Stable и Nightly следуют этому выбору, а кэши хранятся отдельно.</x:String>
 
     <!-- Welcome popup -->

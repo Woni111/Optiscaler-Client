@@ -794,7 +794,7 @@
     <x:String x:Key="TxtGitHubMirrorPrefixPlaceholder">https://gh-proxy.com/</x:String>
     <x:String x:Key="TxtOptiScalerSource">OptiScaler の取得元</x:String>
     <x:String x:Key="TxtOptiScalerSourceOfficial">公式（optiscaler/OptiScaler）</x:String>
-    <x:String x:Key="TxtOptiScalerSourceChinese">中国語版（deYangar/OptiScaler_chs）</x:String>
+    <x:String x:Key="TxtOptiScalerSourceChinese">中国語版（Woni111/OptiScaler_chs）</x:String>
     <x:String x:Key="TxtOptiScalerSourceDesc">中国語版の取得元では OptiScaler_chs の翻訳済みビルドをインストールします。Stable と Nightly の両方がこの選択に従い、キャッシュは公式版と分離されます。</x:String>
 
     <!-- Welcome popup -->

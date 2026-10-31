@@ -161,6 +161,11 @@ namespace OptiscalerClient.Services
                 return;
 
             _config.OptiScalerSource = normalized;
+            if (IsChineseOptiScalerSource)
+            {
+                try { MigrateLegacyChineseOptiScalerCache(); }
+                catch (Exception ex) { DebugWindow.Log($"[Cache] Legacy CHS migration failed: {ex.Message}"); }
+            }
 
             // A source switch must not wait for the normal 15-minute release-check cooldown.
             _config.LastApiCheckTime = null;
@@ -303,6 +308,11 @@ namespace OptiscalerClient.Services
 
             LoadConfiguration();
             NetworkService.Configure(_config.Network);
+            if (IsChineseOptiScalerSource)
+            {
+                try { MigrateLegacyChineseOptiScalerCache(); }
+                catch (Exception ex) { DebugWindow.Log($"[Cache] Legacy CHS migration failed: {ex.Message}"); }
+            }
             LoadLocalVersions();
             LoadReleasesCache();
             LoadExtrasCache();
@@ -891,7 +901,7 @@ namespace OptiscalerClient.Services
                         // Stagger requests by 150 ms each to avoid triggering GitHub's burst
                         // detection while keeping the UI responsive.
                         var optiVersionsTask = IsChineseOptiScalerSource
-                            ? FetchLatestStableReleaseSafelyAsync(EffectiveStableOptiScalerRepo)
+                            ? FetchChineseStableReleasesSafelyAsync(EffectiveStableOptiScalerRepo)
                             : FetchOptiScalerReleasesSafelyAsync(EffectiveStableOptiScalerRepo, isBeta: false);
                         await Task.Delay(150);
                         var optiBetasTask = IsChineseOptiScalerSource
@@ -1044,7 +1054,7 @@ namespace OptiscalerClient.Services
         }
 
         private async Task<System.Collections.Generic.List<OptiScalerReleaseEntry>> FetchAllReleasesWithUrlAsync(
-            RepositoryConfig config, bool isBeta, bool isNightly = false)
+            RepositoryConfig config, bool isBeta, bool isNightly = false, bool stableOnly = false)
         {
             var entries = new System.Collections.Generic.List<OptiScalerReleaseEntry>();
             var repoLabel = $"{config.RepoOwner}/{config.RepoName}";
@@ -1081,6 +1091,12 @@ namespace OptiscalerClient.Services
                     // A nightly channel must contain only nightly tags. This matters when both
                     // channels point at OptiScaler_chs, whose release list mixes v0.9.4 and nightly-*.
                     if (isNightly && !version.Contains("nightly", StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    // The Chinese repository currently publishes prerelease nightly translations
+                    // and will later publish normal translated upstream releases. Keep those
+                    // channels separate even though both come from the same repository.
+                    if (stableOnly && (isPrerelease ||
+                        version.Contains("nightly", StringComparison.OrdinalIgnoreCase)))
                         continue;
                     // Find best download URL from assets
                     string? downloadUrl = null;
@@ -1196,6 +1212,8 @@ namespace OptiscalerClient.Services
                 if (string.IsNullOrWhiteSpace(version)) return entries;
                 if (version.StartsWith("v", StringComparison.OrdinalIgnoreCase))
                     version = version[1..];
+                if (version.Contains("nightly", StringComparison.OrdinalIgnoreCase))
+                    return entries;
 
                 string? downloadUrl = null;
                 if (doc.RootElement.TryGetProperty("assets", out var assets))
@@ -1225,6 +1243,45 @@ namespace OptiscalerClient.Services
             catch (Exception ex)
             {
                 DebugWindow.Log($"[FetchVersions] Latest stable for {RepoKey(config)} failed: {ex.Message}");
+            }
+
+            return entries;
+        }
+
+        /// <summary>
+        /// Loads the Chinese source's stable channel without mixing its nightly prereleases into
+        /// the stable list. The release list supplies recent stable tags; /releases/latest covers
+        /// a stable release that has fallen behind more than a page of nightly builds.
+        /// </summary>
+        private async Task<System.Collections.Generic.List<OptiScalerReleaseEntry>> FetchChineseStableReleasesSafelyAsync(
+            RepositoryConfig config)
+        {
+            var entries = new System.Collections.Generic.List<OptiScalerReleaseEntry>();
+            try
+            {
+                entries.AddRange(await FetchAllReleasesWithUrlAsync(
+                    config, isBeta: false, isNightly: false, stableOnly: true));
+            }
+            catch (Exception ex)
+            {
+                DebugWindow.Log($"[FetchVersions] Chinese stable list for {RepoKey(config)} failed: {ex.Message}");
+            }
+
+            var latest = await FetchLatestStableReleaseSafelyAsync(config);
+            if (latest.Count == 0) return entries;
+
+            foreach (var entry in entries) entry.IsLatestStable = false;
+            var latestVersion = latest[0];
+            var existing = entries.FirstOrDefault(e =>
+                string.Equals(e.Version, latestVersion.Version, StringComparison.OrdinalIgnoreCase));
+            if (existing == null)
+            {
+                entries.Insert(0, latestVersion);
+            }
+            else
+            {
+                existing.DownloadUrl = latestVersion.DownloadUrl ?? existing.DownloadUrl;
+                existing.IsLatestStable = true;
             }
 
             return entries;
@@ -3595,7 +3652,47 @@ namespace OptiscalerClient.Services
         private string GetOptiScalerSourceCacheRoot()
         {
             var root = Path.Combine(_cacheDir, "OptiScaler");
-            return IsChineseOptiScalerSource ? Path.Combine(root, "CHS") : root;
+            if (!IsChineseOptiScalerSource)
+                return root;
+
+            // Keep translated builds separate from official builds and from any previous
+            // Chinese repository configuration. A repository can publish identical tags
+            // with completely different archives.
+            return Path.Combine(root, "CHS", SanitizeCacheSegment(RepoKey(_config.OptiScalerChinese)));
+        }
+
+        private void MigrateLegacyChineseOptiScalerCache()
+        {
+            var legacyRoot = Path.Combine(_cacheDir, "OptiScaler", "CHS");
+            if (!Directory.Exists(legacyRoot)) return;
+
+            var targetRoot = GetOptiScalerSourceCacheRoot();
+            if (string.Equals(
+                    Path.GetFullPath(legacyRoot),
+                    Path.GetFullPath(targetRoot),
+                    StringComparison.OrdinalIgnoreCase))
+                return;
+
+            foreach (var legacyVersionDir in Directory.GetDirectories(legacyRoot))
+            {
+                var version = Path.GetFileName(legacyVersionDir);
+                // Old caches stored versions directly under CHS. Skip the new source namespace
+                // itself (and any other namespace) while moving only version-like folders.
+                if (!version.Any(char.IsDigit) &&
+                    !version.Equals("latest", StringComparison.OrdinalIgnoreCase) &&
+                    !_config.CustomOptiScalerVersions.Contains(version, StringComparer.OrdinalIgnoreCase))
+                    continue;
+
+                var targetVersionDir = Path.Combine(targetRoot, version);
+                if (Directory.Exists(targetVersionDir)) continue;
+
+                Directory.CreateDirectory(targetRoot);
+                Directory.Move(legacyVersionDir, targetVersionDir);
+                DebugWindow.Log($"[Cache] Migrated legacy CHS OptiScaler cache: {version}");
+            }
+
+            if (!Directory.EnumerateFileSystemEntries(legacyRoot).Any())
+                Directory.Delete(legacyRoot);
         }
 
         public string GetOptiScalerCachePath() => GetOptiScalerCachePath(OptiScalerVersion ?? "latest");
