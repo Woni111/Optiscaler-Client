@@ -1,3 +1,19 @@
+#### [1.0.10] ####
+
+# What's Changed
+
+Application update checks and update links now consistently use
+`Woni111/Optiscaler-Client`. Legacy upstream repository settings are mapped to this fork,
+so future releases published in this repository can be detected by the built-in updater.
+
+# Changelog
+
+### Fixes
+
+- Pointed application update checks at `Woni111/Optiscaler-Client`.
+- Pointed the update dialog and changelog links at this fork's Releases page.
+- Added automatic fallback from the legacy upstream app repository to this fork.
+
 #### [1.0.9] ####
 
 # What's Changed

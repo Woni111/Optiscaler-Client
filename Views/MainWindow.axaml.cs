@@ -449,7 +449,8 @@ namespace OptiscalerClient.Views
                 if (_componentService.Config.LastSeenAppVersion != App.AppVersion)
                 {
                     DebugWindow.Log($"[Startup] Showing welcome/changelog popup (LastSeenAppVersion={_componentService.Config.LastSeenAppVersion ?? "none"}, current={App.AppVersion}).");
-                    var welcome = new WelcomeWindow(this);
+                    var welcome = new WelcomeWindow(
+                        this, AppUpdateService.GetReleasesUrl(_componentService.Config.App));
                     await welcome.ShowDialog(this);
                     _componentService.Config.LastSeenAppVersion = App.AppVersion;
                     _componentService.SaveConfiguration();
@@ -3750,7 +3751,8 @@ namespace OptiscalerClient.Views
             if (alreadyNotified)
                 return;
 
-            var popup = new UpdateAvailableWindow(this, latest);
+            var popup = new UpdateAvailableWindow(
+                this, latest, AppUpdateService.GetReleasesUrl(_componentService.Config.App));
             await popup.ShowDialog(this);
 
             config.LastNotifiedUpdateVersion = latest;
@@ -4392,7 +4394,10 @@ namespace OptiscalerClient.Views
 
                 if (hasUpdate && !string.IsNullOrEmpty(appUpdateService.LatestVersion))
                 {
-                    var popup = new UpdateAvailableWindow(this, appUpdateService.LatestVersion);
+                    var popup = new UpdateAvailableWindow(
+                        this,
+                        appUpdateService.LatestVersion,
+                        AppUpdateService.GetReleasesUrl(_componentService.Config.App));
                     await popup.ShowDialog(this);
 
                     var config = _componentService.Config;
@@ -5133,9 +5138,7 @@ namespace OptiscalerClient.Views
         {
             try
             {
-                var repoOwner = _componentService.Config.App.RepoOwner ?? "Optiscaler-Client";
-                var repoName = _componentService.Config.App.RepoName ?? "Optiscaler-Client";
-                var url = $"https://github.com/{repoOwner}/{repoName}";
+                var url = AppUpdateService.GetRepositoryUrl(_componentService.Config.App);
 
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                 {

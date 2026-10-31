@@ -11,6 +11,9 @@ namespace OptiscalerClient.Services
 {
     public class AppUpdateService
     {
+        public const string DefaultRepoOwner = "Woni111";
+        public const string DefaultRepoName = "Optiscaler-Client";
+
         private HttpClient _httpClient => NetworkService.GetHttpClient();
         private readonly ComponentManagementService _componentService;
 
@@ -22,6 +25,37 @@ namespace OptiscalerClient.Services
         {
             _componentService = componentService;
         }
+
+        /// <summary>
+        /// Maps the legacy upstream repository and empty configurations to this fork's release
+        /// repository. Explicit non-upstream repository overrides are preserved.
+        /// </summary>
+        public static RepositoryConfig ResolveAppRepository(RepositoryConfig? repo)
+        {
+            if (repo == null ||
+                string.IsNullOrWhiteSpace(repo.RepoOwner) ||
+                string.IsNullOrWhiteSpace(repo.RepoName) ||
+                (string.Equals(repo.RepoOwner, "Optiscaler-Client", StringComparison.OrdinalIgnoreCase) &&
+                 string.Equals(repo.RepoName, "Optiscaler-Client", StringComparison.OrdinalIgnoreCase)))
+            {
+                return new RepositoryConfig
+                {
+                    RepoOwner = DefaultRepoOwner,
+                    RepoName = DefaultRepoName
+                };
+            }
+
+            return repo;
+        }
+
+        public static string GetRepositoryUrl(RepositoryConfig? repo)
+        {
+            var resolved = ResolveAppRepository(repo);
+            return $"https://github.com/{resolved.RepoOwner}/{resolved.RepoName}";
+        }
+
+        public static string GetReleasesUrl(RepositoryConfig? repo)
+            => GetRepositoryUrl(repo) + "/releases";
 
         private static async Task<HttpResponseMessage> GetWithRetryAsync(
             HttpClient client, string url,
@@ -65,10 +99,7 @@ namespace OptiscalerClient.Services
             IsError = false;
             try
             {
-                var repo = _componentService.Config.App;
-                if (string.IsNullOrWhiteSpace(repo.RepoOwner) || string.IsNullOrWhiteSpace(repo.RepoName))
-                    return false;
-
+                var repo = ResolveAppRepository(_componentService.Config.App);
                 var url = $"https://api.github.com/repos/{repo.RepoOwner}/{repo.RepoName}/releases/latest";
                 DebugWindow.Log($"[AppUpdate] Fetching latest App version from: {url}");
 

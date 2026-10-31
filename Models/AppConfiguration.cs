@@ -91,7 +91,11 @@ namespace OptiscalerClient.Models
     /// </summary>
     public class AppConfiguration
     {
-        public RepositoryConfig App { get; set; } = new();
+        public RepositoryConfig App { get; set; } = new()
+        {
+            RepoOwner = "Woni111",
+            RepoName = "Optiscaler-Client"
+        };
         public RepositoryConfig OptiScaler { get; set; } = new();
         /// <summary>Chinese OptiScaler fork used when <see cref="OptiScalerSource"/> is "chinese".</summary>
         public RepositoryConfig OptiScalerChinese { get; set; } = new();

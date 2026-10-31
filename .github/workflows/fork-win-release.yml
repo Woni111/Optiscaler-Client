@@ -59,7 +59,8 @@ jobs:
           body: |
             Fork build with GitHub mirror support and the official / `Woni111/OptiScaler_chs`
             release source selector. The Chinese source supports translated stable releases and
-            translated nightly prereleases, with source-specific caches.
+            translated nightly prereleases, with source-specific caches. Application update checks
+            and release links now use `Woni111/Optiscaler-Client`.
 
             Built from `${{ github.ref_name }}` at `${{ github.sha }}`.
           files: dist/${{ steps.meta.outputs.asset }}

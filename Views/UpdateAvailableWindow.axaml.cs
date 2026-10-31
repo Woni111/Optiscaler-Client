@@ -6,21 +6,25 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using OptiscalerClient.Helpers;
+using OptiscalerClient.Services;
 
 namespace OptiscalerClient.Views
 {
     public partial class UpdateAvailableWindow : Window
     {
+        private readonly string _releasesUrl = AppUpdateService.GetReleasesUrl(null);
+
         public UpdateAvailableWindow()
         {
             InitializeComponent();
             DialogDimHelper.Register(this);
         }
 
-        public UpdateAvailableWindow(Window owner, string latestVersion)
+        public UpdateAvailableWindow(Window owner, string latestVersion, string? releasesUrl = null)
         {
             InitializeComponent();
             DialogDimHelper.Register(this);
+            _releasesUrl = releasesUrl ?? _releasesUrl;
 
             // Flicker-free startup: start invisible, show after positioning
             this.Opacity = 0;
@@ -71,7 +75,7 @@ namespace OptiscalerClient.Views
             {
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = "https://github.com/Optiscaler-Client/Optiscaler-Client/releases",
+                    FileName = _releasesUrl,
                     UseShellExecute = true
                 });
             }

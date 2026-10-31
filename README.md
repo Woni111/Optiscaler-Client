@@ -92,6 +92,7 @@ Optional integrations, enabled from **Settings → Experimental**:
 - Switch the OptiScaler release source between the official repository and the Chinese [`Woni111/OptiScaler_chs`](https://github.com/Woni111/OptiScaler_chs) builds.
 - The Chinese source supports both translated upstream stable releases and translated nightly prereleases as they are published.
 - Stable and nightly CHS downloads use a source-specific cache namespace, so identically tagged official, translated, and old-source builds do not overwrite each other.
+- Application update checks and release links target this fork's [Releases](https://github.com/Woni111/Optiscaler-Client/releases).
 - Network settings are persisted in app configuration.
 
 ### Settings & Customization
